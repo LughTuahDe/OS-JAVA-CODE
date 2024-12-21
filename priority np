@@ -1,0 +1,46 @@
+import java.util.*;
+
+public class PriorityScheduling {
+    public static void main(String[] args) {
+        int[][] processList = {{0, 5, 2, 1}, {1, 3, 1, 2}, {2, 4, 3, 3}, {4, 1, 4, 4}}; // {AT, BT, Priority, ID}
+        priorityNonPreemptive(processList);
+    }
+
+    static void priorityNonPreemptive(int[][] processList) {
+        Arrays.sort(processList, Comparator.comparingInt(a -> a[0])); // Sort by arrival time
+        List<int[]> readyQueue = new ArrayList<>();
+        Map<Integer, int[]> completed = new LinkedHashMap<>();
+        StringBuilder ganttChart = new StringBuilder("Gantt Chart: ");
+        int time = 0, totalWT = 0, totalTT = 0, index = 0;
+
+        while (!readyQueue.isEmpty() || index < processList.length) {
+            while (index < processList.length && processList[index][0] <= time)
+                readyQueue.add(processList[index++]);
+
+            if (readyQueue.isEmpty()) {
+                ganttChart.append("Idle ");
+                time++;
+                continue;
+            }
+
+            int[] process = readyQueue.stream().min(Comparator.comparingInt(a -> a[2])).orElseThrow();
+            readyQueue.remove(process);
+            ganttChart.append("P").append(process[3]).append(" ");
+            time += process[1];
+            int tt = time - process[0], wt = tt - process[1];
+            totalWT += wt;
+            totalTT += tt;
+            completed.put(process[3], new int[]{time, tt, wt});
+        }
+
+        printResults(ganttChart, completed, processList.length, totalTT, totalWT);
+    }
+
+    static void printResults(StringBuilder ganttChart, Map<Integer, int[]> completed, int n, int totalTT, int totalWT) {
+        System.out.println(ganttChart);
+        System.out.println("\nProcess ID | Completion Time | Turnaround Time | Waiting Time");
+        completed.forEach((id, metrics) -> System.out.printf("    P%d     |        %d       |        %d       |      %d%n", id, metrics[0], metrics[1], metrics[2]));
+        System.out.printf("\nAverage Turnaround Time: %.2f%n", (double) totalTT / n);
+        System.out.printf("Average Waiting Time: %.2f%n", (double) totalWT / n);
+    }
+}
