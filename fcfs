@@ -1,0 +1,32 @@
+import java.util.*;
+
+public class FCFS {
+    public static void main(String[] args) {
+        int[][] processList = {{0, 5, 1}, {1, 3, 2}, {2, 4, 3}, {4, 1, 4}};
+        fcfs(processList);
+    }
+
+    static void fcfs(int[][] processList) {
+        int time = 0, totalWT = 0, totalTT = 0;
+        StringBuilder ganttChart = new StringBuilder("Gantt Chart: ");
+        Map<Integer, int[]> completed = new LinkedHashMap<>();
+
+        for (int[] process : processList) {
+            if (process[0] > time) time = process[0]; // Idle until process arrives
+            ganttChart.append("P").append(process[2]).append(" ");
+            time += process[1];
+            int tt = time - process[0], wt = tt - process[1];
+            totalWT += wt;
+            totalTT += tt;
+            completed.put(process[2], new int[]{time, tt, wt});
+        }
+
+        System.out.println(ganttChart);
+        System.out.println("\nProcess ID | Completion Time | Turnaround Time | Waiting Time");
+        completed.forEach((id, metrics) -> System.out.printf("    P%d     |        %d       |        %d       |      %d%n",
+                id, metrics[0], metrics[1], metrics[2]));
+        
+        System.out.printf("\nAverage Turnaround Time: %.2f%n", totalTT / (double) processList.length);
+        System.out.printf("Average Waiting Time: %.2f%n", totalWT / (double) processList.length);
+    }
+}
