@@ -1,0 +1,50 @@
+import java.util.*;
+
+public class BankersAlgorithm {
+    public static void main(String[] args) {
+        int[] available = {3, 3, 2}; // Available resources
+        int[][] max = {{7, 5, 3}, {3, 2, 2}, {9, 0, 2}, {2, 2, 2}, {4, 3, 3}}; // Maximum demand
+        int[][] allocation = {{0, 1, 0}, {2, 0, 0}, {3, 0, 2}, {2, 1, 1}, {0, 0, 2}}; // Allocated resources
+
+        bankersAlgorithm(available, max, allocation);
+    }
+
+    static void bankersAlgorithm(int[] available, int[][] max, int[][] allocation) {
+        int n = max.length, m = available.length;
+        int[][] need = new int[n][m];
+        boolean[] finished = new boolean[n];
+        List<Integer> safeSequence = new ArrayList<>();
+
+        // Calculate the need matrix
+        for (int i = 0; i < n; i++)
+            for (int j = 0; j < m; j++)
+                need[i][j] = max[i][j] - allocation[i][j];
+
+        // Perform safety check
+        while (safeSequence.size() < n) {
+            boolean foundProcess = false;
+
+            for (int i = 0; i < n; i++) {
+                if (!finished[i] && canAllocate(need[i], available)) {
+                    for (int j = 0; j < m; j++) available[j] += allocation[i][j];
+                    safeSequence.add(i);
+                    finished[i] = true;
+                    foundProcess = true;
+                }
+            }
+
+            if (!foundProcess) {
+                System.out.println("The system is in an unsafe state.");
+                return;
+            }
+        }
+
+        System.out.println("Safe sequence: " + safeSequence);
+    }
+
+    static boolean canAllocate(int[] need, int[] available) {
+        for (int i = 0; i < need.length; i++)
+            if (need[i] > available[i]) return false;
+        return true;
+    }
+}
