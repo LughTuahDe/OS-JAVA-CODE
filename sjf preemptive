@@ -1,0 +1,53 @@
+import java.util.*;
+
+public class SJFPreemptive {
+    public static void main(String[] args) {
+        int[][] processList = {{0, 5, 1}, {1, 3, 2}, {2, 4, 3}, {4, 1, 4}};
+        sjfPreemptive(processList);
+    }
+
+    static void sjfPreemptive(int[][] processList) {
+        Arrays.sort(processList, Comparator.comparingInt(a -> a[0])); // Sort by arrival time
+        PriorityQueue<int[]> readyQueue = new PriorityQueue<>(Comparator.comparingInt(a -> a[1])); // By burst time
+        Map<Integer, int[]> completed = new LinkedHashMap<>();
+        StringBuilder ganttChart = new StringBuilder("Gantt Chart: ");
+        int time = 0, totalWT = 0, totalTT = 0, index = 0, processes = processList.length;
+
+        int[] remainingBurst = Arrays.stream(processList).mapToInt(p -> p[1]).toArray();
+
+        while (completed.size() < processes) {
+            while (index < processes && processList[index][0] <= time) 
+                readyQueue.add(processList[index++]);
+
+            if (readyQueue.isEmpty()) {
+                ganttChart.append("Idle ");
+                time++;
+                continue;
+            }
+
+            int[] process = readyQueue.poll();
+            ganttChart.append("P").append(process[2]).append(" ");
+            time++;
+            remainingBurst[process[2] - 1]--;
+
+            if (remainingBurst[process[2] - 1] == 0) {
+                int ct = time;
+                int tt = ct - process[0];
+                int wt = tt - process[1];
+                totalWT += wt;
+                totalTT += tt;
+                completed.put(process[2], new int[]{ct, tt, wt});
+            } else {
+                readyQueue.add(new int[]{process[0], remainingBurst[process[2] - 1], process[2]});
+            }
+        }
+
+        System.out.println(ganttChart);
+        System.out.println("\nProcess ID | Completion Time | Turnaround Time | Waiting Time");
+        completed.forEach((id, metrics) -> System.out.printf("    P%d     |        %d       |        %d       |      %d%n",
+                id, metrics[0], metrics[1], metrics[2]));
+        
+        System.out.printf("\nAverage Turnaround Time: %.2f%n", totalTT / (double) processes);
+        System.out.printf("Average Waiting Time: %.2f%n", totalWT / (double) processes);
+    }
+}
