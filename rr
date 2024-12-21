@@ -1,0 +1,46 @@
+import java.util.*;
+
+public class RoundRobin {
+    public static void main(String[] args) {
+        int[][] processList = {{0, 5, 1}, {1, 3, 2}, {2, 4, 3}, {4, 1, 4}};
+        int quantum = 2;
+        roundRobin(processList, quantum);
+    }
+
+    static void roundRobin(int[][] processList, int quantum) {
+        Queue<int[]> queue = new LinkedList<>(Arrays.asList(processList));
+        Map<Integer, int[]> completed = new LinkedHashMap<>();
+        StringBuilder ganttChart = new StringBuilder("Gantt Chart: ");
+        int time = 0, totalWT = 0, totalTT = 0;
+
+        while (!queue.isEmpty()) {
+            int[] process = queue.poll();
+            if (process[0] > time) { // Idle time
+                ganttChart.append("Idle ");
+                time++;
+                queue.add(process);
+                continue;
+            }
+            ganttChart.append("P").append(process[2]).append(" ");
+            int execTime = Math.min(quantum, process[1]);
+            time += execTime;
+            process[1] -= execTime;
+            if (process[1] == 0) {
+                int tt = time - process[0], wt = tt - (processList[process[2] - 1][1]);
+                completed.put(process[2], new int[]{time, tt, wt});
+                totalWT += wt;
+                totalTT += tt;
+            } else {
+                queue.add(process); // Re-add process if incomplete
+            }
+        }
+
+        System.out.println(ganttChart);
+        System.out.println("\nProcess ID | Completion Time | Turnaround Time | Waiting Time");
+        completed.forEach((id, metrics) -> System.out.printf("    P%d     |        %d       |        %d       |      %d%n",
+                id, metrics[0], metrics[1], metrics[2]));
+        
+        System.out.printf("\nAverage Turnaround Time: %.2f%n", totalTT / (double) processList.length);
+        System.out.printf("Average Waiting Time: %.2f%n", totalWT / (double) processList.length);
+    }
+}
