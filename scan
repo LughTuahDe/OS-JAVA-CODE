@@ -1,0 +1,26 @@
+import java.util.*;
+
+public class SCAN {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Requests: ");
+        List<Integer> req = new ArrayList<>();
+        while (sc.hasNextInt()) req.add(sc.nextInt());
+        System.out.print("Head: ");
+        int head = sc.nextInt();
+        System.out.print("Direction (up/down): ");
+        String dir = sc.next();
+
+        req.addAll(Arrays.asList(0, 199, head));
+        Collections.sort(req);
+
+        int idx = req.indexOf(head), seek = 0;
+        List<Integer> seq = dir.equals("up") ? req.subList(idx, req.size()) : req.subList(0, idx + 1);
+        if (!dir.equals("up")) Collections.reverse(seq);
+        seq.addAll(dir.equals("up") ? req.subList(0, idx) : req.subList(idx + 1, req.size()));
+
+        System.out.println("Seek sequence: " + seq);
+        for (int pos : seq) seek += Math.abs(head - (head = pos));
+        System.out.println("Total Seek Time: " + seek);
+    }
+}
