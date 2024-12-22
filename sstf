@@ -1,0 +1,22 @@
+import java.util.*;
+
+public class SSTF {
+    public static void main(String[] args) {
+        Scanner sc = new Scanner(System.in);
+        System.out.print("Requests: ");
+        List<Integer> req = new ArrayList<>();
+        while (sc.hasNextInt()) req.add(sc.nextInt());
+        System.out.print("Head: ");
+        int head = sc.nextInt(), seek = 0;
+
+        System.out.print("Seek sequence: " + head);
+        while (!req.isEmpty()) {
+            int closest = req.stream().min(Comparator.comparingInt(r -> Math.abs(r - head))).get();
+            seek += Math.abs(head - closest);
+            head = closest;
+            req.remove((Integer) closest);
+            System.out.print(" -> " + head);
+        }
+        System.out.println("\nTotal Seek Time: " + seek);
+    }
+}
